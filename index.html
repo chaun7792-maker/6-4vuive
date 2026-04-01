@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Món Quà Kỳ Diệu - Golden Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@500;700&family=Montserrat:wght@800&display=swap');
+
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%); font-family: 'Quicksand', sans-serif; transition: background 1s; }
+        canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
+        
+        /* --- EDITOR CHUYÊN NGHIỆP (?edit=true) --- */
+        #editor { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); color: #333; z-index: 5000; overflow-y: auto; padding: 30px; box-sizing: border-box; }
+        .ed-box { max-width: 600px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 25px; box-shadow: 0 15px 50px rgba(0,0,0,0.15); border: 2px solid #eee; }
+        .ed-box h2 { color: #ff4d6d; text-align: center; font-family: 'Dancing Script', cursive; font-size: 40px; margin-top: 0; }
+        .ed-box label { display: block; font-weight: 700; margin-top: 20px; color: #444; font-size: 15px; }
+        .ed-box input, .ed-box textarea { width: 100%; padding: 14px; margin-top: 10px; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; font-family: inherit; transition: 0.3s; font-size: 14px; }
+        .ed-box input:focus { border-color: #ff4d6d; outline: none; box-shadow: 0 0 10px rgba(255,77,109,0.2); }
+        .btn-gen { width: 100%; padding: 18px; background: linear-gradient(45deg, #ff4d6d, #ff758f); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 30px; font-size: 18px; transition: 0.3s; box-shadow: 0 5px 20px rgba(255,77,109,0.3); }
+        .btn-gen:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,77,109,0.4); }
+        #out-l { margin-top: 25px; background: #f9f9f9; border: 1px dashed #ff4d6d; color: #ff4d6d; font-size: 12px; padding: 15px; word-break: break-all; border-radius: 8px; cursor: pointer; }
+
+        /* --- UI CHÍNH --- */
+        #main-ui { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; z-index: 10; }
+        
+        /* Lá thư ban đầu */
+        #init-mail { font-size: 130px; cursor: pointer; animation: floating 2.8s infinite ease-in-out; filter: drop-shadow(0 0 25px rgba(255,255,255,0.4)); transition: 0.5s; }
+        #init-mail:hover { transform: scale(1.15) rotate(5deg); }
+        @keyframes floating { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-40px) rotate(3deg); } }
+
+        /* Hiệu ứng rơi mượt mà */
+        .fall-item { position: absolute; color: #FFD700; font-weight: 700; font-size: 28px; text-shadow: 0 3px 12px rgba(0,0,0,0.6); z-index: 5; font-family: 'Dancing Script', cursive; white-space: nowrap; pointer-events: none; }
+        .fall-img { position: absolute; width: 80px; height: 80px; border-radius: 50%; border: 5px solid #fff; object-fit: cover; z-index: 5; box-shadow: 0 8px 20px rgba(0,0,0,0.4); pointer-events: none; }
+
+        /* Thư khổng lồ */
+        #huge-mail { display: none; font-size: 250px; position: absolute; top: -450px; transition: 3s cubic-bezier(0.19, 1, 0.22, 1); cursor: pointer; z-index: 20; filter: drop-shadow(0 0 40px rgba(255,255,255,0.2)); }
+        #huge-mail.show { top: 22%; }
+
+        /* Bức thư bên trong */
+        #letter-paper { display: none; position: absolute; width: 85%; max-width: 500px; background: #ffffff; padding: 45px; border-radius: 20px; box-shadow: 0 25px 70px rgba(0,0,0,0.7); z-index: 100; text-align: center; transform: scale(0); transition: 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); border-left: 10px solid #ff4d6d; }
+        #letter-paper.open { transform: scale(1); }
+        #typewriter { font-size: 21px; line-height: 1.8; color: #333; font-weight: 500; min-height: 120px; text-align: left; font-family: 'Quicksand', sans-serif; }
+        #typewriter::after { content: '|'; animation: blink 0.7s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .btn-magic { padding: 14px 35px; background: linear-gradient(45deg, #ff4d6d, #ff758f); color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: 700; margin-top: 30px; font-size: 16px; box-shadow: 0 6px 20px rgba(255,77,109,0.3); transition: 0.3s; }
+        .btn-magic:hover { transform: scale(1.05); box-shadow: 0 8px 25px rgba(255,77,109,0.4); }
+    </style>
+</head>
+<body>
+
+    <audio id="music" loop></audio>
+    <canvas id="skyCanvas"></canvas>
+    <canvas id="particleCanvas"></canvas>
+
+    <div id="editor">
+        <div class="ed-box">
+            <h2>💖 Thiết Kế Quà Tặng</h2>
+            <p style="text-align:center; color:#777; font-size:14px; margin-top:0;">Nhập thông tin bên dưới, sau đó bấm "Tạo Link".</p>
+            <form id="editor-form">
+                <div class="form-group"><label>1. Danh sách tên các bạn (cách nhau bởi dấu phẩy):</label><input type="text" id="in-n" placeholder="Nam, Lan, Hương, Gia đình, Cả lớp..."></div>
+                <div class="form-group"><label>2. Link ảnh online (rơi cùng tên, cách nhau bởi dấu phẩy):</label><textarea id="in-i" rows="3" placeholder="https://link-anh-1.jpg, https://link-anh-2.png..."></textarea></div>
+                <div class="form-group"><label>3. Nội dung lời chúc (đánh máy tính):</label><textarea id="in-w" rows="4" placeholder="Viết những lời chúc chân thành nhất..."></textarea></div>
+                <div class="form-group"><label>4. Dòng chữ tụ lại cuối cùng (Nên viết HOA):</label><input type="text" id="in-pt" maxlength="20" placeholder="YÊU CẢ LỚP MÌNH"></div>
+                <div class="form-group"><label>5. Link nhạc nền (.mp3 online):</label><input type="text" id="in-m" placeholder="Dán link nhạc mp3 trực tiếp vào đây"></div>
+                <button type="submit" class="btn-gen">TẠO LINK THIỆP & COPY</button>
+            </form>
+            <textarea id="out-l" readonly onclick="this.select(); document.execCommand('copy'); alert('Đã copy link!')" style="display:none;"></textarea>
+        </div>
+    </div>
+
+    <div id="main-ui">
+        <div id="init-mail" onclick="startExperience()">✉️</div>
+        <div id="huge-mail" onclick="openLetter()">📩</div>
+        
+        <div id="letter-paper">
+            <div id="typewriter"></div>
+            <button id="magic-btn" class="btn-magic" style="display:none;" onclick="startParticleShow()">Bấm để xem bí mật ✨</button>
+        </div>
+    </div>
+
+    <script>
+        // =====================================
+        // --- 1. QUẢN LÝ DỮ LIỆU & EDITOR ---
+        // =====================================
+        const urlParams = new URLSearchParams(window.location.search);
+        const isEdit = urlParams.get('edit') === 'true';
+        const config = {
+            n: urlParams.get('n') || "Bạn yêu, Gia đình, 10A1, Đồng nghiệp",
+            i: urlParams.get('i') || "", // Không có ảnh mặc định
+            w: urlParams.get('w') || "Gửi đến bạn những điều ngọt ngào và tuyệt vời nhất. Chúc bạn một ngày tràn đầy niềm vui, luôn rạng rỡ và hạnh phúc bên những người thân yêu! Mọi điều tốt đẹp nhất sẽ đến với bạn.",
+            pt: urlParams.get('pt') || "FOREVER TOGETHER",
+            m: urlParams.get('m') || "https://www.bensound.com/bensound-music/bensound-love.mp3" // Link nhạc mẫu
+        };
+
+        if(isEdit) {
+            document.getElementById('editor').style.display = 'block';
+            document.getElementById('in-n').value = config.n;
+            document.getElementById('in-i').value = config.i;
+            document.getElementById('in-w').value = config.w;
+            document.getElementById('in-pt').value = config.pt;
+            document.getElementById('in-m').value = config.m;
+            
+            document.getElementById('editor-form').onsubmit = (e) => {
+                e.preventDefault();
+                const n = encodeURIComponent(document.getElementById('in-n').value);
+                const i = encodeURIComponent(document.getElementById('in-i').value);
+                const w = encodeURIComponent(document.getElementById('in-w').value);
+                const pt = encodeURIComponent(document.getElementById('in-pt').value);
+                const m = encodeURIComponent(document.getElementById('in-m').value);
+                const link = `${window.location.origin}${window.location.pathname}?n=${n}&i=${i}&w=${w}&pt=${pt}&m=${m}`;
+                const outLink = document.getElementById('out-l');
+                outLink.style.display = 'block';
+                outLink.value = link;
+                outLink.select();
+                document.execCommand('copy');
+                alert("Đã tạo link thiệp và copy vào bộ nhớ tạm!");
+            };
+        }
+
+        // =====================================
+        // --- 2. TRỜI SAO XANH & SAO BĂNG ---
+        // =====================================
+        const sky = document.getElementById('skyCanvas');
+        const sCtx = sky.getContext('2d');
+        let stars = [];
+        function initSky() {
+            sky.width = window.innerWidth; sky.height = window.innerHeight;
+            for(let i=0; i<300; i++) stars.push({x: Math.random()*sky.width, y: Math.random()*sky.height, r: Math.random()*1.8 + 0.2, o: Math.random()});
+        }
+        function animateSky() {
+            sCtx.clearRect(0,0,sky.width, sky.height);
+            sCtx.fillStyle = "#fff";
+            stars.forEach(s => {
+                sCtx.globalAlpha = Math.abs(Math.sin(Date.now()*0.0012 + s.o*15));
+                sCtx.beginPath(); sCtx.arc(s.x, s.y, s.r, 0, Math.PI*2); sCtx.fill();
+            });
+            requestAnimationFrame(animateSky);
+        }
+        function startShootingStars() {
+            let count = 0;
+            let iv = setInterval(() => {
+                let x = Math.random()*sky.width, y = 0;
+                let siv = setInterval(() => {
+                    sCtx.strokeStyle = "rgba(255,255,255,0.8)"; sCtx.lineWidth=2;
+                    sCtx.beginPath(); sCtx.moveTo(x,y); sCtx.lineTo(x-120, y+120); sCtx.stroke();
+                    x-=18; y+=18; if(y > sky.height) clearInterval(siv);
+                }, 16);
+                count++; if(count >= 5) clearInterval(iv); // 5 cái sao băng
+            }, 2500);
+        }
+
+        // =====================================
+        // --- 3. HẠT TỤ HÌNH (PARTICLES) ---
+        // =====================================
+        const pCanvas = document.getElementById('particleCanvas');
+        const pCtx = pCanvas.getContext('2d');
+        let particles = [];
+        
+        // Hàm lấy tọa độ điểm từ hình ảnh/chữ
+        function getShapeCoords(type, text = "") {
+            pCanvas.width = window.innerWidth; pCanvas.height = window.innerHeight;
+            pCtx.clearRect(0,0,pCanvas.width, pCanvas.height);
+            
+            if(type === 'heart') {
+                pCtx.fillStyle = "white";
+                // Vẽ trái tim đặc ruột
+                for (let y = -20; y < 20; y += 0.5) {
+                    for (let x = -30; x < 30; x += 0.5) {
+                        let f = Math.pow((x*0.1), 2) + Math.pow((y*0.1) - Math.sqrt(Math.abs(x*0.1)), 2);
+                        if(f < 2.5) { // 2.5 là độ đặc
+                            pCtx.fillRect(pCanvas.width/2 + x*12, pCanvas.height/2 + y*12, 4, 4); // x12 là kích thước
+                        }
+                    }
+                }
+            } else {
+                // Vẽ dòng chữ khổng lồ
+                pCtx.fillStyle = "white";
+                pCtx.font = "bold 130px 'Montserrat', sans-serif"; // Kích thước cực lớn
+                pCtx.textAlign = "center";
+                pCtx.textBaseline = "middle";
+                pCtx.fillText(text, pCanvas.width/2, pCanvas.height/2);
+            }
+            
+            const data = pCtx.getImageData(0,0,pCanvas.width, pCanvas.height).data;
+            pCtx.clearRect(0,0,pCanvas.width, pCanvas.height);
+            let res = [];
+            for(let y=0; y<pCanvas.height; y+=5) { // Lấy mẫu cứ mỗi 5px
+                for(let x=0; x<pCanvas.width; x+=5) {
+                    if(data[(y*pCanvas.width + x)*4 + 3] > 128) res.push({x, y});
+                }
+            }
+            return res;
+        }
+
+        function initParticles(coords) {
+            particles = [];
+            for(let i=0; i<coords.length; i++) {
+                particles.push({
+                    x: Math.random()*pCanvas.width, y: Math.random()*pCanvas.height, // Bắt đầu ngẫu nhiên
+                    tx: coords[i].x, ty: coords[i].y, // Mục tiêu
+                    c: Math.random() > 0.5 ? '#ff4d6d' : '#ffffff', // Hồng hoặc Trắng
+                    r: Math.random()*1.5 + 1.5 // Kích thước hạt 2.5-4px
+                });
+            }
+        }
+
+        function morphParticles(newCoords) {
+            let max = Math.max(particles.length, newCoords.length);
+            for(let i=0; i<max; i++) {
+                if(i < particles.length) {
+                    let target = newCoords[i % newCoords.length];
+                    particles[i].tx = target.x; particles[i].ty = target.y;
+                }
+            }
+        }
+
+        function animateParticles() {
+            pCtx.clearRect(0,0,pCanvas.width, pCanvas.height);
+            particles.forEach(p => {
+                p.x += (p.tx - p.x) * 0.05; // Tốc độ tụ
+                p.y += (p.ty - p.y) * 0.05;
+                pCtx.fillStyle = p.c;
+                pCtx.globalAlpha = 1;
+                pCtx.beginPath(); pCtx.arc(p.x, p.y, p.r, 0, Math.PI*2); pCtx.fill();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        // =====================================
+        // --- 4. LUỒNG CHƯƠNG TRÌNH ---
+        // =====================================
+        function startExperience() {
+            document.getElementById('music').src = config.m;
+            document.getElementById('music').play().catch(() => { console.log("Music blocked by browser"); });
+            document.getElementById('init-mail').style.display = 'none';
+            initSky(); animateSky(); startShootingStars();
+            
+            // Xử lý danh sách rơi (Tên và Ảnh)
+            const nameList = config.n.split(',').map(v => v.trim()).filter(v => v);
+            const imgList = config.i.split(',').map(v => v.trim()).filter(v => v);
+            let combinedList = [...nameList.map(v=>({t:'n', v})), ...imgList.map(v=>({t:'i', v}))];
+            
+            // Hàm trộn mảng
+            combinedList = combinedList.sort(() => Math.random() - 0.5);
+
+            let idx = 0;
+            let iv = setInterval(() => {
+                if(idx >= combinedList.length) {
+                    clearInterval(iv);
+                    setTimeout(() => {
+                        let hm = document.getElementById('huge-mail');
+                        hm.style.display = 'block'; setTimeout(()=>hm.classList.add('show'), 100);
+                    }, 3000); // 3s sau khi rơi xong thì hiện thư
+                    return;
+                }
+                let item = combinedList[idx++];
+                let el;
+                if(item.t === 'n') {
+                    // Rơi Tên
+                    el = document.createElement('div');
+                    el.className = 'fall-item';
+                    el.innerText = item.v;
+                } else {
+                    // Rơi Ảnh (Thực sự hiện ảnh)
+                    el = document.createElement('img');
+                    el.className = 'fall-img';
+                    el.src = item.v;
+                    el.onerror = function() { this.style.display='none'; }; // Ẩn nếu ảnh lỗi
+                }
+                
+                el.style.left = Math.random()*80+10+'%'; // Giữa màn hình
+                document.body.appendChild(el);
+                
+                // Hiệu ứng rơi và xoay
+                el.animate([{top:'-120px', transform:'rotate(0deg)'}, {top:'115vh', transform:`rotate(${Math.random()*360 - 180}deg)`}], {duration: 6500, easing: 'linear'}).onfinish = () => el.remove();
+            }, 850); // Mỗi 0.85s rơi 1 cái
+        }
+
+        function openLetter() {
+            document.getElementById('huge-mail').style.display = 'none';
+            const paper = document.getElementById('letter-paper');
+            paper.style.display = 'block';
+            setTimeout(() => paper.classList.add('open'), 100);
+            
+            // Hiệu ứng đánh máy
+            let text = config.w;
+            let i = 0;
+            let tw = setInterval(() => {
+                document.getElementById('typewriter').innerText = text.substring(0, i++);
+                if(i > text.length) {
+                    clearInterval(tw);
+                    document.getElementById('magic-btn').style.display = 'inline-block';
+                }
+            }, 65); // Tốc độ đánh máy
+        }
+
+        function startParticleShow() {
+            document.getElementById('letter-paper').style.display = 'none';
+            // 1. Tụ thành Trái Tim Đặc
+            initParticles(getShapeCoords('heart'));
+            animateParticles();
+            
+            // 2. 5 giây sau chuyển thành Chữ Khổng Lồ
+            setTimeout(() => {
+                morphParticles(getShapeCoords('text', config.pt));
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
